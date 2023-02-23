@@ -8,20 +8,24 @@ def maximum_value(orders, maximum_load):
     Returns:
         int: The maximum value that can be achieved without exceeding the maximum load.
     """
-    # Sort the orders by value in descending order
-    orders = sorted(orders, key=lambda x: x['value'], reverse=True)
+    # Get the number of orders
+    num_orders = len(orders)
 
-    # Initialize the total value and total weight
-    total_value = 0
-    total_weight = 0
+    # Create a 2D table to store the maximum achievable value for each order and weight capacity.
+    table = [[0] * (maximum_load + 1) for _ in range(num_orders + 1)]
 
-    # Iterate over the sorted orders
-    for order in orders:
-        # If adding the current order would not exceed the maximum load
-        if total_weight + order['weight'] <= maximum_load:
-            # Add the current order's value and weight to the total value and weight
-            total_value += order['value']
-            total_weight += order['weight']
+    # Use dynamic programming to compute the maximum value that can be achieved
+    for i in range(1, num_orders + 1):
+        for j in range(1, maximum_load + 1):
+            # If the weight of the current order is more than the weight capacity, skip this order
+            if orders[i - 1]['weight'] > j:
+                table[i][j] = table[i - 1][j]
+            else:
+                # Compute the maximum value that can be achieved by either including or excluding the current order.
+                # Include the value of the current order if it fits in the remaining weight capacity.
+                # Update the remaining weight capacity and compute the maximum value for the current weight capacity.
+                # Choose the higher value between including and excluding the current order.
+                table[i][j] = max(table[i - 1][j], table[i - 1][j - orders[i - 1]['weight']] + orders[i - 1]['value'])
 
-    # Return the total value
-    return total_value
+    # Return the maximum value that can be achieved for the given weight capacity
+    return table[num_orders][maximum_load]
